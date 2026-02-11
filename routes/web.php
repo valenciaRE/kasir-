@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Product;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\UserController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PenerimaanBarangController;
 use App\Http\Controllers\PengeluaranBarangController;
 use App\Http\Controllers\KasirController;
+use Carbon\Carbon;
+
 
 /*
 |--------------------------------------------------------------------------
