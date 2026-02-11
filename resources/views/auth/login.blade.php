@@ -17,7 +17,7 @@
   <!-- AdminLTE -->
   <link rel="stylesheet" href="{{ asset('adminLte') }}/dist/css/adminlte.min.css">
 
-  <!-- CUSTOM STYLE (TAMBAHAN SAJA) -->
+  <!-- CUSTOM STYLE -->
   <style>
     body.login-page {
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -78,6 +78,10 @@
       border-radius: 8px;
       font-size: 14px;
     }
+
+    .eye-icon {
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -91,6 +95,14 @@
 
     <div class="card-body">
       <p class="login-box-msg">Sign in to start your session</p>
+
+      {{-- NOTIFIKASI REGISTER BERHASIL --}}
+      @if (session('success'))
+        <div class="alert alert-success">
+          <i class="fas fa-check-circle mr-1"></i>
+          {{ session('success') }}
+        </div>
+      @endif
 
       {{-- ERROR VALIDASI --}}
       @if ($errors->any())
@@ -117,10 +129,11 @@
         </div>
 
         <div class="input-group mb-3">
-          <input type="password" name="password" class="form-control" placeholder="Password" required>
+          <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-lock"></span>
+              <span class="fas fa-eye eye-icon ml-2" onclick="togglePassword(this)"></span>
             </div>
           </div>
         </div>
@@ -130,6 +143,11 @@
         </button>
       </form>
       {{-- END FORM --}}
+
+      <p class="text-center mt-3 mb-0">
+        Belum punya akun?
+        <a href="{{ route('register.form') }}">Register</a>
+      </p>
 
     </div>
   </div>
@@ -142,6 +160,23 @@
 <script src="{{ asset('adminLte') }}/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE -->
 <script src="{{ asset('adminLte') }}/dist/js/adminlte.min.js"></script>
+
+<!-- SHOW / HIDE PASSWORD -->
+<script>
+  function togglePassword(icon) {
+    const input = document.getElementById('password');
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+</script>
 
 </body>
 </html>

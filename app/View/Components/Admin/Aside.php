@@ -11,9 +11,75 @@ class Aside extends Component
     /**
      * Create a new component instance.
      */
+    public $routes;
     public function __construct()
     {
-        //
+        $this->routes = [
+            [
+                "label" => "Dashboard",
+                "icon" => "fas fa-laptop",
+                "route_name" => "dashboard",
+                "route_active" => "dashboard",
+                "is_dropdown" => false
+            ],
+            [
+                "label" => "Data Users",
+                "icon" => "fas fa-users",
+                "route_name" => "users.index",
+                "route_active" => "users.*",
+                "is_dropdown" => false
+            ],
+            [
+                "label"        => "Master Data",
+                "icon"         => "fas fa-database",
+                "route_active" => "master-data*",
+                "is_dropdown"  => true,
+                "dropdown"     => [
+                    [
+                        "label"      => "Kategori",
+                        "route_active" => "master-data.kategori.*",
+                        "route_name" => "master-data.kategori.index",
+                    ],
+                    [
+                        "label"      => "Product",
+                        "route_active" => "master-data.product.*",
+                        "route_name" => "master-data.product.index",
+                    ],
+                ]
+                ],
+            [
+                "label" => "Penerimaan Barang",
+                "icon" => "fas fa-truck-loading",
+                "route_name" => "penerimaan-barang.index",
+                "route_active" => "penerimaan-barang.*",
+                "is_dropdown" => false
+            ],
+            [
+                "label" => "Pengeluaran Barang",
+                "icon" => "fas fa-store",
+                "route_name" => "pengeluaran-barang.index",
+                "route_active" => "pengeluaran-barang.*",
+                "is_dropdown" => false
+            ],
+            [
+                "label"        => "Laporan",
+                "icon"         => "fas fa-file-invoice",
+                "route_active" => "laporan.*",
+                "is_dropdown"  => true,
+                "dropdown"     => [
+                    [
+                        "label"      => "Penerimaan barang",
+                        "route_active" => "laporan.penerimaan-barang.*",
+                        "route_name" => "laporan.penerimaan-barang.laporan",
+                    ],
+                    [
+                        "label"      => "Pengeluaran barang",
+                        "route_active" => "laporan.pengeluaran-barang.*",
+                        "route_name" => "laporan.pengeluaran-barang.laporan",
+                    ],
+                ]
+            ],
+        ];
     }
 
     /**

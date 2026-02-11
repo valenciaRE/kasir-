@@ -8,39 +8,41 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function index()
+    public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    public function handleLogin(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ], [
-            'email.required' => 'Email wajib diisi',
-            'email.email' => 'Format email tidak valid',
-            'password.required' => 'Password wajib diisi'
-        ]);
+   public function login(Request $request)
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        if(Auth::attempt($credentials)){
-            $request->session()->regenerate();
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard');
+        if (auth()->user()->role === 'admin') {
+            return redirect()->route('dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'kredensial yang diberikan tidak sesuai dengan data kami.',
-        ])->onlyInput('email');
-
+        return redirect()->route('kasir.index');
     }
+
+    return back()->withErrors([
+        'email' => 'Email atau password salah.',
+    ])->onlyInput('email');
+}
+
 
     public function logout(Request $request)
     {
-        Auth::Logout();
+        Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+
+        return redirect('/login');
     }
 }
