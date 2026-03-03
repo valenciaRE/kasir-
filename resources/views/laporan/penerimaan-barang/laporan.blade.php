@@ -29,7 +29,7 @@
                         <td>{{ $item->nomor_faktur }}</td>
                         <td>{{ $item->distributor }}</td>
                         <td>{{ $item->tanggal_penerimaan }}</td>
-                        <td>{{ $item->petugas_penerima }}</td>
+                        <td>{{ $item->user->name ?? 'Admin' }}</td>
                         <td>
                             <a href="{{ route('laporan.penerimaan-barang.detail-laporan', $item->nomor_penerimaan) }}" class=text-primary>
                                 Detal

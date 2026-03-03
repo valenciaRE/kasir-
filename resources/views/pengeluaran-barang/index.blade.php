@@ -119,28 +119,44 @@ $(function () {
         ajax: {
             url: "{{ route('get-data.produk') }}",
             dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return { search: params.term };
+            },
             processResults: function (data) {
-                data.forEach(p => produkCache[p.id] = p);
+                // handle format { results: [...] } dari controller
+                let items = data.results ? data.results : data;
+                items.forEach(p => produkCache[p.id] = p);
                 return {
-                    results: data.map(p => ({
+                    results: items.map(p => ({
                         id: p.id,
-                        text: p.nama_produk
+                        text: p.text || p.nama_produk,
+                        stok: p.stok,
+                        harga_jual: p.harga_jual
                     }))
                 };
-            }
-        }
+            },
+            cache: true
+        },
+        minimumInputLength: 1
     });
 
+    // Ambil stok & harga langsung dari data select2
     $('#select2').on('select2:select', function (e) {
-        let id = e.params.data.id;
+        let data = e.params.data;
 
-        $.get("{{ route('get-data.cek-stok') }}", { id }, res => {
-            $('#current_stok').val(res);
-        });
-
-        $.get("{{ route('get-data.cek-harga') }}", { id }, res => {
-            $('#harga_jual').val(res);
-        });
+        if (data.stok !== undefined) {
+            $('#current_stok').val(data.stok);
+            $('#harga_jual').val(data.harga_jual);
+        } else {
+            let id = data.id;
+            $.get("{{ route('get-data.cek-stok') }}", { id }, res => {
+                $('#current_stok').val(res);
+            });
+            $.get("{{ route('get-data.cek-harga') }}", { id }, res => {
+                $('#harga_jual').val(res);
+            });
+        }
     });
 
     // =====================
@@ -157,8 +173,9 @@ $(function () {
         if (qty <= 0) return alert('Qty tidak valid!');
         if (qty > stok) return alert('Stok tidak cukup!');
 
-        let nama = produkCache[id].nama_produk;
-        let sub  = qty * harga;
+        let produk = produkCache[id];
+        let nama   = produk ? (produk.text || produk.nama_produk) : '';
+        let sub    = qty * harga;
 
         let row = $('#table-produk tbody').find(`tr[data-id="${id}"]`);
 
@@ -178,8 +195,7 @@ $(function () {
                     <td class="text-right">${harga}</td>
                     <td class="text-right col-sub">${sub}</td>
                     <td class="text-center">
-                        <button type="button"
-                            class="btn btn-danger btn-sm btn-remove">
+                        <button type="button" class="btn btn-danger btn-sm btn-remove">
                             <i class="fa fa-trash"></i>
                         </button>
                     </td>
@@ -211,25 +227,19 @@ $(function () {
     }
 
     function hitungKembalian() {
-        let total = parseInt($('#total_raw').val()) || 0;
-        let bayar = parseInt($('#bayar').val()) || 0;
+        let total   = parseInt($('#total_raw').val()) || 0;
+        let bayar   = parseInt($('#bayar').val()) || 0;
+        let selisih = bayar - total;
 
-        let selisih = bayar - total; // BISA MINUS
         $('#kembalian_display').val(selisih);
 
-        // warna
         if (selisih < 0) {
-            $('#kembalian_display')
-                .removeClass('text-success')
-                .addClass('text-danger');
+            $('#kembalian_display').removeClass('text-success').addClass('text-danger');
         } else {
-            $('#kembalian_display')
-                .removeClass('text-danger')
-                .addClass('text-success');
+            $('#kembalian_display').removeClass('text-danger').addClass('text-success');
         }
 
-        // kunci simpan kalau bayar kurang
-        $('#btn-simpan').prop('disabled', bayar < total);
+        $('#btn-simpan').prop('disabled', bayar < total || total === 0);
     }
 
     $('#bayar').on('input', hitungKembalian);
@@ -263,16 +273,14 @@ $(function () {
         }
 
         let hidden = '';
-
         $('#table-produk tbody tr').each(function (i, row) {
-           hidden += `
-            <input type="hidden" name="produk[${i}][nama_produk]" value="${$(row).find('td:first').text()}">
-            <input type="hidden" name="produk[${i}][qty]" value="${$(row).find('.col-qty').text()}">
-            <input type="hidden" name="produk[${i}][produk_id]" value="${$(row).data('id')}">
-            <input type="hidden" name="produk[${i}][harga]" value="${$(row).data('harga')}">
-            <input type="hidden" name="produk[${i}][sub_total]" value="${$(row).data('subtotal')}">
-        `;
-
+            hidden += `
+                <input type="hidden" name="produk[${i}][nama_produk]" value="${$(row).find('td:first').text()}">
+                <input type="hidden" name="produk[${i}][qty]" value="${$(row).find('.col-qty').text()}">
+                <input type="hidden" name="produk[${i}][produk_id]" value="${$(row).data('id')}">
+                <input type="hidden" name="produk[${i}][harga]" value="${$(row).data('harga')}">
+                <input type="hidden" name="produk[${i}][sub_total]" value="${$(row).data('subtotal')}">
+            `;
         });
 
         $('#data-hidden').html(hidden);

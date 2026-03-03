@@ -30,10 +30,10 @@ class PenerimaanBarangController extends Controller
         ]);
 
        $newData = PenerimaanBarang::create([
-        'nomor_penerimaan'  => PenerimaanBarang::nomorPenerimaan(),
-        'distributor'       => $request->distributor,
-        'nomor_faktur'      => $request->nomor_faktur,
-        'petugas_penerimaan'=> Auth::user()->name,
+        'nomor_penerimaan'   => PenerimaanBarang::nomorPenerimaan(),
+        'distributor'        => $request->distributor,
+        'nomor_faktur'       => $request->nomor_faktur,
+        'petugas_penerimaan' => auth()->user()->name, // Tambahkan ini 
 ]);
 
 

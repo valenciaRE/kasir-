@@ -75,27 +75,38 @@ class ProductController extends Controller
     {
         $search = request()->query('search');
 
-        $query = Product::select('id', 'name_product as nama_produk');
-        $product = $query
+        $products = Product::select('id', 'name_product as nama_produk', 'harga_jual', 'stok')
+            ->where('is_active', 1)
             ->where('name_product', 'like', '%' . $search . '%')
-            ->get();
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id'          => $p->id,
+                    'text'        => $p->nama_produk,
+                    'nama_produk' => $p->nama_produk,
+                    'harga_jual'  => $p->harga_jual,
+                    'stok'        => $p->stok,
+                ];
+            });
 
-        return response()->json($product);
+        return response()->json([
+            'results' => $products
+        ]);
     }
 
     public function cekStok()
     {
-        $id = request()->query('id');
+        $id      = request()->query('id');
         $product = Product::find($id);
-        $stok = $product ? $product->stok : 0;
+        $stok    = $product ? $product->stok : 0;
         return response()->json($stok);
     }
 
     public function cekHarga()
     {
-    $id = request()->query('id');
-    $product = Product::find($id);
-    $harga = $product ? $product->harga_jual : 0;
-    return response()->json($harga);
+        $id      = request()->query('id');
+        $product = Product::find($id);
+        $harga   = $product ? $product->harga_jual : 0;
+        return response()->json($harga);
     }
 }

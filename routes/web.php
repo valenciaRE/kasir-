@@ -13,7 +13,6 @@ use App\Http\Controllers\PengeluaranBarangController;
 use App\Http\Controllers\KasirController;
 use Carbon\Carbon;
 
-
 /*
 |--------------------------------------------------------------------------
 | PUBLIC
@@ -29,18 +28,10 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
-
-    Route::get('/login', [LoginController::class, 'showLoginForm'])
-        ->name('login.form');
-
-    Route::post('/login', [LoginController::class, 'login'])
-        ->name('login');
-
-    Route::get('/register', fn () => view('auth.register'))
-        ->name('register.form');
-
-    Route::post('/register', [RegisterController::class, 'store'])
-        ->name('register');
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login.form');
+    Route::post('/login', [LoginController::class, 'login'])->name('login');
+    Route::get('/register', fn () => view('auth.register'))->name('register.form');
+    Route::post('/register', [RegisterController::class, 'store'])->name('register');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])
@@ -49,10 +40,10 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN AREA
+| PROTECTED ROUTES (semua user yang sudah login)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     /*
     | DASHBOARD
@@ -64,8 +55,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     | USERS
     */
     Route::prefix('users')->as('users.')
-        ->controller(UserController::class)
-        ->group(function () {
+        ->controller(UserController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
             Route::delete('/destroy/{id}', 'destroy')->name('destroy');
@@ -96,6 +86,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
 
     /*
+    | KASIR (POS)
+    */
+    Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
+    Route::get('/kasir/products', [KasirController::class, 'products'])->name('kasir.products');
+    Route::get('/kasir/transactions', [KasirController::class, 'transactions'])->name('kasir.transactions');
+    Route::get('/kasir/reports', [KasirController::class, 'reports'])->name('kasir.reports');
+    Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
+    Route::post('/kasir/midtrans-token', [KasirController::class, 'midtransToken'])
+        ->name('kasir.midtrans.token');
+
+    /*
     | PENERIMAAN BARANG
     */
     Route::prefix('penerimaan-barang')->as('penerimaan-barang.')
@@ -103,6 +104,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/', 'store')->name('store');
+        });
+
+    /*
+    | PENGELUARAN BARANG
+    */
+    Route::prefix('pengeluaran-barang')->as('pengeluaran-barang.')
+        ->controller(PengeluaranBarangController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{id}/print', 'print')->name('print');
         });
 
     /*
@@ -126,40 +138,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                     ->name('detail-laporan');
             });
     });
-});
-
-/*
-|--------------------------------------------------------------------------
-| KASIR AREA (POS)
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'role:kasir'])->group(function () {
-
-    /*
-    | KASIR (POS)
-    */
-    Route::get('/kasir', [KasirController::class, 'index'])
-        ->name('kasir.index');
-
-    Route::post('/kasir', [KasirController::class, 'store'])
-        ->name('kasir.store');
-
-    /*
-    | MIDTRANS QRIS TOKEN
-    */
-    Route::post('/kasir/midtrans-token', [KasirController::class, 'midtransToken'])
-        ->name('kasir.midtrans.token');
-
-    /*
-    | PENGELUARAN BARANG
-    */
-    Route::prefix('pengeluaran-barang')->as('pengeluaran-barang.')
-        ->controller(PengeluaranBarangController::class)
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/print', 'print')->name('print');
-        });
 
     /*
     | GET DATA (AJAX)
@@ -169,4 +147,5 @@ Route::middleware(['auth', 'role:kasir'])->group(function () {
         Route::get('/cek-stok-produk', [ProductController::class, 'cekStok'])->name('cek-stok');
         Route::get('/cek-harga-produk', [ProductController::class, 'cekHarga'])->name('cek-harga');
     });
+
 });
